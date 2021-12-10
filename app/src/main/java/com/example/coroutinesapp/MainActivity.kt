@@ -15,7 +15,9 @@ class MainActivity : AppCompatActivity() {
     val adviceAPI = "https://api.adviceslip.com/advice"
     private lateinit var textAdvice: TextView
     private lateinit var buttonAdvice: Button
+    private lateinit var buttonStop: Button
 
+    private var stop = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,23 +26,36 @@ class MainActivity : AppCompatActivity() {
 
         textAdvice = findViewById<TextView>(R.id.tv_Show)
         buttonAdvice = findViewById<Button>(R.id.btn_Advice)
+        buttonStop = findViewById<Button>(R.id.btn_stop)
 
         buttonAdvice.setOnClickListener() {
-
+            stop = true
             requestAPI()
+        }
+        buttonStop.setOnClickListener {
+            stop = false
         }
 
     }
 
     private fun requestAPI() {
         CoroutineScope(Dispatchers.IO).launch {
-            val data = async {
 
-                fetchRandomApi()
-            }.await()
+            while (stop) {
 
-            if (data.isNotEmpty()) {
-                updateAdvice(data)
+                if (!stop) {
+                    break
+                }
+
+
+                val data = async {
+
+                    fetchRandomApi()
+                }.await()
+
+                if (data.isNotEmpty()) {
+                    updateAdvice(data)
+                }
             }
         }
     }
